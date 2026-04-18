@@ -1,0 +1,95 @@
+#+TITLE: Lecture 1: Probability and Counting
+#+PROPERTY: header-args:python :session *Python* :results output :exports both
+#+STARTUP: latexpreview
+
+#+BEGIN_SRC python
+  import math
+#+END_SRC
+
+- Math is the logic of certainty, statistics is the logic of uncertainty
+- Sample space /S/: the set of all possible outcomes of some experiment (considered broadly)
+- Event: Subset of the sample space. Venn diagrams
+- Sets: Very important in mathematical development of stats
+- Deeply counterintuitive. But will become more intuitive the more you think about it
+- Naive / highschool definition of prob: P(A)=#favorable_outcomes/#possible_outcomes
+- Assumptions of that:
+  - all outcomes are equally likely
+  - finite number of outcomes (finite sample space)
+- First major problem: How do we count?
+- Multiplication rule: if have experiment with n_1 possible outcomes.
+  and for each outcome of 1st experiment there are n_1 possible
+  outcomes for the 2nd experiment ... n_r outcomes for the rth
+  experiment, then overall there are n_1 x n_2 x ... x n_r possible
+  outcomes.
+- Tree diagram. (garden of forking paths)
+- Ice cream example: 2 cone possibilities, 3 ice cream flavors. 2x3=6
+  outcomes. Or 3x2=6 outcomes (you can be the flavor first).
+- Implication: exponential growth
+
+* Example: Probability of a full house with 5 card hand
+
+To calculate number number of subsets of size k of a group n objects
+(order unimportant)
+
+Binomal coefficient: \(\binom{n}{k}\) , "n choose k", /nCk/.
+
+\begin{align}
+\binom{n}{k} = \frac{n!}{(n-k)!k!}
+\end{align}
+
+0 if k > n.
+
+Full house:
+
+Denominator is 52c5, any 5 cards from the 52.
+
+3 cards of one rank, 2 of another.
+
+Imagine the case of 3 sevens, 2 tens.
+
+The number of ways I can choose 3 sevens from the 4 in the deck is
+4c3. And 2 10s, 4c2.
+
+So the number of ways you can get 7s full of 10s is (4c3)x(4c2)
+
+#+BEGIN_SRC python
+  print(math.comb(4,3)*math.comb(4,2))
+#+END_SRC
+
+#+RESULTS:
+: 24
+
+Since there are 13 ranks, the first rank can be any of the 13 ranks:
+13*4c3. The second can be any of the remaining twelve that aren't the
+first one.
+
+#+BEGIN_SRC python
+  print(13*math.comb(4,3)*12*math.comb(4,2))
+#+END_SRC
+
+#+RESULTS:
+: 3744
+
+over the denominator
+
+#+BEGIN_SRC python
+  print(13*math.comb(4,3)*12*math.comb(4,2)/math.comb(52,5))
+#+END_SRC
+
+#+RESULTS:
+: 0.0014405762304921968
+
+** Sampling table
+
+Choose k objects out of n
+
+#+BEGIN_EXAMPLE
+              order_matters    order_doesnt
+replace           n^k           (n+k-1)Ck
+dont_replace  n(n-1)(n-2)...       nCk
+#+END_EXAMPLE
+
+Order matters ones are easy from the multiplication rule. nCk we went
+through, pretty logical. top right is very tricky to derive or intuit,
+very subtle.
+

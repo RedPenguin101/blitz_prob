@@ -1,0 +1,128 @@
+#+TITLE: Chapter 1: Probability and Counting
+#+PROPERTY: header-args:python :session *Python* :results output :exports both
+#+STARTUP: latexpreview
+
+#+BEGIN_SRC python
+  import math
+#+END_SRC
+
+* Pebble World and the Naive Definition
+
+If an experiment is performed, there will be one *outcome*.
+
+The *Sample Space* /S/ is the set of all possible outcomes.
+
+An *Event* /A/ is a set of outcomes, a subset of the sample space. We say
+event A *occured* if the actual outcome is in the subset.
+
+Picture this as a /pebble world/: The outcomes are all (equally sized)
+pebbles. The sample space is the set of all pebbles. An event is a set
+of pebbles. An experiment is the selection of one pebble. Since
+they're equally sized, the probability of selecting any one pebble is
+the same.
+
+The *naive* definition of probability says the probability of an event /A/
+is the number of outcomes in /A/, divided by the total number of
+outcomes. Or
+
+\begin{equation}
+P_{\text{naive}}(A) = \frac{|A|}{|S|}
+\end{equation}
+
+From this, and the fact that \(|A^c|=|S|-|A|\), that \(P(A^c)=1-P(A)\).
+
+The naive definition has two assumptions:
+
+1. That S is finite
+2. That each 'pebble' has equal mass.
+
+* Sets
+
+Probability is build on the idea of sets.
+
+A set /S/ with /n/ elements has \(2^n\) subsets (including ∅ and /S/)
+
+Sets are great because they give us lots of nice operations to use.
+For example, De Morgan's laws.
+
+\begin{align*}
+(A \cup B)^c = A^c \cap B^c \\
+(A \cap B)^c = A^c \cup B^c 
+\end{align*}
+
+Set notation gives us a language to talk about events. The following
+is the event that the first of 10 coin flips is heads
+
+\begin{equation}
+A_1 = \{(1,s_2,...s_{10}) : s_j \in {0,1} \text{ for } 2 <= j <= 10\}
+\end{equation}
+
+And define events in terms of other events. If \( A_j \) is the event
+that the \(j^{th}\) flip is heads then:
+
+\begin{align*}
+B = \bigcup_{j=1}^{10} A_j \\
+C = \bigcap_{j=1}^{10} A_j \\
+\end{align*}
+
+B and C are the events that at least one throw is heads and /all/ throws
+are heads.
+
+* Methods for counting
+
+When the numbers of pebbles is small, counting is OK. When the number
+gets large, it get hard.
+
+** Multiplication rule and Forking Paths
+
+Say a shop sells ice cream. You can have a cone or cup. And there are
+three flavors: Chocolate, vanilla, strawberry. You can draw a tree
+which splits into two branches, representing the holder choice, and
+then each of those splits into three, representing the ice cream
+choice. Or you can do three then two, representing the opposite. This
+can be represented as a tree.
+
+#+begin_example
+       .             .
+      / \           /|\
+     x   x         / | \
+    /|\ /|\       x  x  x
+    xxx xxx      /\ / \ /\
+                x x x x x x
+#+end_example
+
+Thinking in terms of trees is helpful, even when the tree is too big
+to physically draw.
+
+In both cases we can see that the total number of outcomes is
+3x2=2x3=6. This is the multiplication rule: if there are two
+experiments with /a/ and /b/ outcomes, the total number of outcomes is
+/axb/. (there are some caveats which we'll ignore for now).
+
+If you buy two ice creams, the number of possibilities is 6x6=36.
+
+What if you're interested in the number of combinations of the two ice
+creams, like /(cupStraw, coneChoc)/. Still 36? No, because /(coneChoc,
+coneChoc)/ is one of those combinations, but so is /(coneChoc,
+coneChoc)/. They are the same, obviously, so should only be counted
+once. There are 30 possibilities, with the duplicates are elminated.
+Or if you're being really strict, and want to consider /(cupStraw,
+coneChoc)/ the same as /(coneChoc, cupStraw)/, then there are 21.
+
+* Sampling
+
+How many ways can you choose /k/ objects from a total of /n/ objects? (A
+good mental model here is selecting balls labelled 1-n from a jar).
+
+This depends on a couple of things:
+
+1. Are you replacing the balls after each choice?
+2. Does order matter? That is, is selecting ball 1, then 2, the same
+   as selecting 2, then 1?
+
+It's easier if order matters, because it follows directly from the
+multiplication rule. With replacement it's a simple matter of n
+choices, k times. nxnxn.... \(n^k\). Without replacements, it's
+similar, but after each 'pull' you have one less ball in the jar, so
+instead of nxnxn..., it's nx(n-1)x(n-2)...(n-k+1)
+
