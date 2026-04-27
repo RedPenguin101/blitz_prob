@@ -1,0 +1,539 @@
+#+TITLE: Chapter 1: Probability and Counting
+#+PROPERTY: header-args:python :session *Python* :results output :exports both
+#+STARTUP: latexpreview
+
+#+begin_src python
+  from itertools import permutations
+  from collections import Counter
+  import math
+  import polars as pl
+#+end_src
+
+#+RESULTS:
+
+* Counting
+
+** 1 MISSISSIPPI
+
+/How many ways are there to permute the letters in the word MISSISSIPPI?/
+
+The answer hinges on whether you consider the duplicated letters
+unique. If I swap the first two S's in MIsSISSIPPI to MISsISSPPI, is
+it a different permutation? If the answer to that is 'yes', then the
+answer is 11!
+
+If the answer is 'no', it's trickier.
+
+Consider the simpler case of /ABB/. This has 3!=6 permutations, but only
+3 if you consider B and b interchangeable. This table shows all the
+permutations in the first column, and in the second indicates if the
+permutation is a duplicate of an earlier row.
+
+| perm | dupe? |
+|------+-------|
+| ABb  |       |
+| AbB  |   x   |
+| BAb  |       |
+| bAB  |   x   |
+| BbA  |       |
+| bBA  |   x   |
+
+Trying a few more examples and comparing /n!/ with the brute-forced
+number of unique results, is seems like there's a relationship between
+the number of duplicated letters in the set and the divisor of the
+total permutations and unique permutations.
+
+#+begin_src python
+  strings = ["ABB", "ABBC", "ABBCC", "ABBCD", "ABBBCD", "ABBBCC"]
+  uniq    = [len(set(permutations(s))) for s in strings]
+  perms   = [math.factorial(len(s)) for s in strings]
+  df = pl.DataFrame({"strings":strings, "perms": perms, "unique": uniq})
+  df = df.with_columns((pl.col("perms")/pl.col("unique")).alias("divisor"))
+  print(df)
+#+end_src
+
+#+RESULTS:
+#+begin_example
+shape: (6, 4)
+┌─────────┬───────┬────────┬─────────┐
+│ strings ┆ perms ┆ unique ┆ divisor │
+│ ---     ┆ ---   ┆ ---    ┆ ---     │
+│ str     ┆ i64   ┆ i64    ┆ f64     │
+╞═════════╪═══════╪════════╪═════════╡
+│ ABB     ┆ 6     ┆ 3      ┆ 2.0     │
+│ ABBC    ┆ 24    ┆ 12     ┆ 2.0     │
+│ ABBCC   ┆ 120   ┆ 30     ┆ 4.0     │
+│ ABBCD   ┆ 120   ┆ 60     ┆ 2.0     │
+│ ABBBCD  ┆ 720   ┆ 120    ┆ 6.0     │
+│ ABBBCC  ┆ 720   ┆ 60     ┆ 12.0    │
+└─────────┴───────┴────────┴─────────┘
+#+end_example
+
+If there is a single dupe, the divisor is 2. If there are two dupes,
+there are 4. With a single triple, 6, and with a triple and
+double, 12. The 6 from 3 (together with the fact we're dealing with
+counting) leads me to think it's something to do with factorials:
+3!=6, 2!=2. And the 4 and 12 lead to think it's a product
+relationship: 3!x2!=12, 2!x2!=4.
+
+Checking this out, including with MISSISSIPPI:
+
+#+begin_src python
+  strings = ["ABB", "ABBC", "ABBCC", "ABBCD", "ABBBCD", "ABBBCC", "MISSISSIPPI"]
+  uniq    = [len(set(permutations(s))) for s in strings]
+  perms   = [math.factorial(len(s)) for s in strings]
+  def calc_unique(string): return math.factorial(len(string))/math.prod([math.factorial(x) for x in list(Counter(string).values())])
+  calced = [calc_unique(s) for s in strings]
+  df = pl.DataFrame({"strings":strings, "calced":calced, "brute_force_check": uniq})
+  df = df.with_columns((pl.col('calced')==pl.col('brute_force_check')).alias('check'))
+  print(df)
+#+end_src
+
+#+RESULTS:
+#+begin_example
+shape: (7, 4)
+┌─────────────┬─────────┬───────────────────┬───────┐
+│ strings     ┆ calced  ┆ brute_force_check ┆ check │
+│ ---         ┆ ---     ┆ ---               ┆ ---   │
+│ str         ┆ f64     ┆ i64               ┆ bool  │
+╞═════════════╪═════════╪═══════════════════╪═══════╡
+│ ABB         ┆ 3.0     ┆ 3                 ┆ true  │
+│ ABBC        ┆ 12.0    ┆ 12                ┆ true  │
+│ ABBCC       ┆ 30.0    ┆ 30                ┆ true  │
+│ ABBCD       ┆ 60.0    ┆ 60                ┆ true  │
+│ ABBBCD      ┆ 120.0   ┆ 120               ┆ true  │
+│ ABBBCC      ┆ 60.0    ┆ 60                ┆ true  │
+│ MISSISSIPPI ┆ 34650.0 ┆ 34650             ┆ true  │
+└─────────────┴─────────┴───────────────────┴───────┘
+#+end_example
+
+So apparently it's /n!/ divided by the product of the factorials of the
+counts of each element in the set.
+
+I suppose the rationale for this is that for any character which is
+duplicated x times, there are /x!/ ways you can arrange those letters.
+So /n!/ is going to have /x!/ duplicates of the 'same' permutation. And
+the way to eliminate these duplications is to divide by /x!/
+
+Taking a single permutation MISSISSIPPI as an example: there are 2!=2
+ways to arrange two P's: Pp and pP. So there are 2! ways to arrange
+the P's in this permutation: MISSISSIPpI, and MISSISSIpPI. This will
+of course be the case for /any/ given permutation: there will be two
+ways to arrange the Ps. This is the same for the S's: there are 4!=24
+ways to arrange 4 S's, so there are going to be 24 'duplicates' in
+MISSISSIPPI, and in every other permutation, if only the S's are
+considered. If you consider /both/ S's and P's, that's 24x2=48. And
+bringing the 4 I's in, multiplying the 48 by 4!=24, you get 1152.
+
+So the answer to the direct question is 34650,
+
+\begin{align*}
+\text{unique perms}=\frac{|\text{MISSISSIPPI}|!}{|\text{IIII}|!|\text{SSSS}|!|\text{PP}|!} \\
+=\frac{11!}{4!4!2!} \\
+=\frac{39916800}{1152} \\
+= 34650
+\end{align*}
+
+*** Post solution note
+
+This is apparently the *multinomial coefficient*.
+
+$$\frac{n!}{n_1! \, n_2! \cdots n_k!}$$
+
+where $n$ is the total number of items and $n_1, n_2, \ldots, n_k$ are
+the counts of each distinct item (so $n_1 + n_2 + \cdots + n_k = n$).
+
+*** Additional Post solution note
+
+Example 1.4.18 has basically this example, with the word /STATISTICS/ (or /SSSTTTIIAC)/.
+It uses the multinomial
+
+$$
+\frac{10!}{3!3!2!}
+$$
+
+But also the binomial equivalent
+
+$$
+\binom{10}{3}\binom{7}{3}\binom{4}{2}\binom{2}{1}\binom{1}{1}
+$$
+
+Which can be verbalized as "find where to put the 3 S's out of 10
+slots. Then the 3 T's from the remaining 7 slots. Then the..." etc.
+
+** 2 Phone Numbers
+
+*** a)
+
+/How many 7-digit phone numbers are possible, given that the first digit can't be 0 or 1?/
+
+There are 10 digits, so the number unique 1-digit phone numbers is 10.
+The number of unique 2-digit numbers is 10x10. 3-digit: 10x10x10. n-digit $10^n$.
+
+If the first number can only be one of 8 digits, the possiblities for
+the first numbers are $8$. And then there are $10^6$ ways of
+choosing the last 6. So $8 \cdot 10^6 = 8,000,000$
+
+*** b)
+
+/What about if, in addition, phone numbers can't start with 911?/
+
+There are $10^{7-3}$ numbers that /do/ begin with 911. The numbers that
+begin 911 are included in the results from part a (since none of them
+begin with 0 or 1). So all we need to do is subtract this from the
+previous answer: 7,990,000
+
+$$
+8 \cdot 10^6 - 10^4 = 8,000,000 - 10,000 = 7,990,000
+$$
+
+** 3 Fred's Dinners
+
+*Fred is planning to go to dinner each night of a certain week, Monday
+through Friday, with each dinner being at one of his 10 favorite
+restaurants*
+
+*** a) Without replacement
+
+How many possibilities are there for Fred's schedule for that Monday
+through Friday, if Fred is not willing to eat at the same restaurant
+more than once?
+
+The implication here is that order is important - a schedule of
+(1,2,3,4,5) is different from (2,1,3,4,5). So the answer here is
+sampling without replacement: 10x9x8x7x6=30240.
+
+*** b) With limited replacement
+
+How many possibilities are there if Fred is willing to eat at the same
+restaurant more than once, but is not willing to eat at the same place
+twice in a row (or more)?
+
+On day 1, he can pick from 10. On day 2, he can pick from 9, because
+he can't choose the one from the previous day. On day 3, it's 9 again,
+because he can pick anything except the restaurant from day 2.
+
+So the answer is 10x9x9x9x9=65610
+
+** 4 Round Robin
+
+A round-robin tournament is being held with n tennis players; this means that every
+player will play against every other player exactly once.
+
+*** a) Outcomes
+
+How many possible outcomes are there for the tournament (the outcome
+lists out who won and who lost for each game)?
+
+Each game can either be win or lose. So if there's 1 game, that's 2
+outcomes. For two games, 2x2=4. In other words, it's $2^g$, where g is
+the number of games. So (from part b) $|S|=2^{\binom{n}{2}}$
+
+*** b) Games
+
+How many games are played in total?
+
+If there are two players, it's one game (AB). If three, two games
+(AB,AC,BC). If four, six (AB,AC,AD,BC,BD,CD).
+
+This is the 'choosing pairs' example, similar to the birthday problem:
+$\text{games}=\binom{n}{2}$
+
+** 5 Knockout
+
+A knock-out tournament is being held with $2^n$ tennis players. This
+means that for each round, the winners move on to the next round and
+the losers are eliminated, until only one person remains. For example,
+if initially there are $2^4$ = 16 players, then there are 8 games in the
+first round, then the 8 winners move on to round 2, then the 4 winners
+move on to round 3, then the 2 winners move on to round 4, the winner
+of which is declared the winner of the tournament. (There are various
+systems for determining who plays whom within a round, but these do
+not matter for this problem.)
+
+*** a) How many rounds are there?
+
+There are n rounds. Each round halves the number of competitors until
+there are only two left in the final. Mathematically it's $log_2{2^n}=n$
+
+*** b) How many games are there?
+
+Count how many games in total are played, by adding up the numbers of
+games played in each round.
+
+A round of $2^k$ players will have $2^{k-1}$ games in it (i.e
+$\frac{2^k}{2}$.) So the number of rounds in a full tournament with n
+rounds is the sum of powers of 2 up to $2^{n-1}$
+
+The sum of a sequence of powers of $2^i$ is $2^{i+1}-1$ so the number
+of games in a tournament with n rounds is $2^{(n-1)+1}-1=2^n-1$
+
+*** c) How many games are there (again)
+
+Count how many games in total are played, this time by directly
+thinking about it without doing almost any calculation. Hint: How many
+players need to be eliminated?
+
+There will only be one player left after every round is played. So
+$2^n-1$ players need to be eliminated. Each game eliminates one
+player, so there need to be that number of games.
+
+** 6 Chess
+
+There are 20 people at a chess club on a certain day. They each find
+opponents and start playing. How many possibilities are there for how
+they are matched up, assuming that in each game it does matter who has
+the white pieces (in a chess game, one player has the white pieces and
+the other player has the black pieces)?
+
+You can get all possible combination of pairs by lining up all of the
+20 players in every possible permutation, and then dividing them into
+pairs: 20! ways.
+
+AB,CD,EF,...
+
+However this overcounts because the order of the pairs themselves
+doesn't matter. The following is the same:
+
+AB,EF,CD,...
+
+Since every permutation of pairs will be represented, the overcounting
+will be by a factor of the number of permutations of pairs. So divide
+by 10! to deduplicate. The answer is 20!/10!.
+
+Note that, since ordering /within/ the pair /does/ matter (AB,CD,EF is /not/
+the same as BA,CD,EF) we do not need to deduplicate these two cases.
+If we did, we would need to divide further by $2^n$. The proof of this
+is in example 1.5.4.
+
+** 7 Chess 2
+
+Two chess players, A and B, are going to play 7 games. Each game as
+three possible outcomes: a win for A (which is a loss for B), a draw
+(tie) and loss for A (which is a win for B). A win is worth 1 point, a
+draw 0.5 points, a loss 0 points.
+
+*** a) Specific games outcome
+
+How many possible outcomes for the individual games are there, such
+that overall player A ends up with 3 wins, 2 draws and 2 losses?
+
+An outcome here is a set of results of the 7 games, like /WDWWLWD/,
+where W is a win for A, D is a draw, L is a loss. To count all the
+scenarios for 3 wins, 2 draws, 2 losses is to 'place' a W, D or L in
+the available slots. So
+
+\begin{equation}
+\binom{7}{3}\binom{4}{2}\binom{2}{2} = 210
+\end{equation}
+
+*** b) Specific points outcome
+
+How many possible outcomes for individual games are there, such that A
+ends up with 4 points and B ends up with 3 points?
+
+An observation here is that /every/ outcome has a score of 7, since for
+every game results in a total of 1 points. So the question can be
+simplified to: A has 4 points.
+
+How many ways are there for A to end with 4 points?
+
+WWWWLLL (4W,0D,3L)
+WWWDDLL (3W,2D,2L)
+WWDDDDL (2W,4D,1L)
+WDDDDDD (1W,6D,0L)
+
+So using the same logic as part A:
+
+\begin{equation}
+\binom{7}{4}\binom{3}{0} +
+\binom{7}{3}\binom{4}{2} +
+\binom{7}{2}\binom{5}{4} +
+\binom{7}{1}\binom{6}{6} = 35 + 210 + 105 + 7 = 357
+\end{equation}
+
+*** c) best-of-7
+
+Now assume they are playing a best-of-7 match, where the match will
+end when either player has 4 points or when 7 games have been played,
+whichever is first. For example, if after 6 games, the score is 4 to 2
+in favor of A, then A wins the match and they don't play a 7th game.
+How many possible outcomes are there for individual games such that
+the match lasts for 7 games and A wins by a score of 4 to 3?
+
+Consider how many points A would need to have after the 6th game to be
+able to ultimately win with 4 points. They would need to be on 3.5
+points, and draw. Or be on 3 points, and win. So we can count the
+number of ways A can have 3.5 points after 6 games, add the number of
+ways they can be on 3 points, and that's the answer (after each of
+these scenarios there's exactly 1 way to end up with 4 points: draw
+and win respectively)
+
+How many ways are there to be on 3 points after 6 games?
+
+WWWLLL
+WWDDLL
+WDDDDL
+DDDDDD
+
+6C3 + 6C2*4C2 + 6C1*5C4 + 6C6 = 20 + 90 + 30 + 1 = 141
+
+And 3.5 points?
+
+WWWDLL
+WWDDDL
+WDDDDD
+
+6C3*3C2 + 6C2*4C3 + 6C1 = 60 + 60 + 6 = 126
+
+So the total is 141+126=267
+
+** 8 Splitting teams
+
+*** a) 12 into 3 teams of 2/5/5
+
+How many ways are there to split a dozen people into 3 teams, where
+one team has 2 people and the two teams have 5 people each?
+
+Choose the first team with 12C2 (66). There are 10c5 (252) ways of
+choosing 5 from 10, but we need to divide by 2, since whenever you
+divide a group into two equally size subgroups, you have to account
+for the fact that you can get the same subgroups two ways: by
+selecting the subgroup directly, or indirectly as a result of
+selecting everyone /not/ in the subgroup.
+
+If the group is ABCDEF:
+Selecting ABC will select the other subgroup DEF
+Selecting DEF will also select the other subgroup ABC
+
+So the answer is $66\cdot252 / 2$
+
+*** b) 12 into 3 teams of 4/4/4
+
+How many ways are there to split a dozen people into 3 teams, where
+each team has 4 people?
+
+The logic around over counting also applies here. If I take the group
+ABCDEF, and my first team is AB, there will be 2 permutations of
+AB,CD,EF in the resulting set.
+
+AB,CD,EF
+AB,EF,CD
+
+If my first team is CD, then for every result there will be 2
+permutations of that outcome:
+
+CD,AB,EF
+CD,EF,AB
+
+And if the first team is EF there will be 2 permutations of that
+outcome:
+
+EF,AB,CD
+EF,CD,AB
+
+So we are overcounting by a factor of 6. In general if you are
+dividing a group of n into (n/k)=m equal groups, you will be
+overcounting by a factor of m!
+
+So when dividing a group of 12 into 3 equal groups of 4, the answer
+is:
+
+\begin{equation}
+\frac{\binom{12}{4}\cdot\binom{8}{4}}{3!} = 5775
+\end{equation}
+
+#+begin_src python
+  import math
+
+  def f(n,k):
+    assert n % k == 0
+    r = 1
+    nmp = n
+    while nmp > 0:
+        r *= math.comb(nmp,k)
+        nmp -= k
+    return r / math.factorial(n//k)
+  print(f(12,4))
+#+end_src
+
+#+RESULTS:
+: 5775.0
+
+An alternative way to consider this is as a special case of the
+multinomial: The multinomial is the number of permutations of n items,
+where m of those items are distinct, and $n_i$ is the 'counts' of the
+distinct item i: $n!/(n_1!n_2!...n_m!)$. So this is the special case
+where every count is the same, each count is /n/m=k/: $n!/k!^m$.
+
+But since order doesn't matter we need to deduplicate. The m groups
+will have m! permutations. Hence $n!/(k!^m m!)$
+
+An algebraic proof of the equivalence can be seen by expanding out the
+formula
+
+\begin{equation}
+\binom{n}{k}\cdot\binom{n-k}{k} \cdot \binom{n-2k}{k} \cdot ...
+\end{equation}
+
+Since $\binom{n}{k} = \frac{n!}{k!(n-k)!}$, the numerator of each term
+cancels with part of the denominator of the previous term, leaving $\frac{n!}{k!^m}$
+
+** 9 Paths
+
+*** a) Paths to 110,111
+
+How many paths are there from the point (0,0) to the point (110,111)
+in the plane such that each step either consists of going one unit up
+or one to the right?
+
+A path of this type will have exactly X+Y = 221 steps, exactly X of
+them to the right, exactly Y up.
+
+At each point, there are two choices: go up or go right. An exception
+is when x=110, in which case there is a single choice: up. Similarly
+when y=111, the only choice is right.
+
+#+begin_example
+RRUU
+RURU
+RUUR
+URRU
+URUR
+UURR
+
+RRUU
+..X
+..X
+XXX
+
+RURU
+..X
+.XX
+XX.
+
+RUUR
+.XX
+.X.
+XX.
+
+URRU
+..X
+XXX
+X..
+
+URUR
+.XX
+XX.
+X..
+
+UURR
+XXX
+X..
+X..
+#+end_example
+
+*** b) Paths to 210, 211 through 110, 111
+
+How many paths are there from (0,0) to (210, 211), under the same
+conditions, but the path has to go through (110,111)

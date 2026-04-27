@@ -1,0 +1,41 @@
+* jars and slots and the 4 sampling methods
+
+There are 4 sampling methods.
+
+1. ORSample(n,k) -> $n^k$ -> ordered multi-set
+2. RSample(n,k)  -> $\binom{n+k-1}{k}$ -> multi-set
+3. OSample(n,k)  -> $n(n-1)...(n-k+1)$ -> ordered set
+4. Sample(n,k)   -> $\binom{n}{k}$ -> set
+
+Experiment 1: There's a jar with n balls in them, labelled 1 through
+n. I have next to me some unlabelled balls. And I have k ball-sized
+slots in front of me (k <= n).
+
+Experiement 2: There are n slots in front of me. I have k balls in a
+jar (k <= n), labelled 1 through k.
+
+For the *Sample* method:
+
+Experiement 1: I take the ball from the jar, and put it directly in
+one of the slots (I don't write the number on a blank ball). I repeat
+this k times until there are no slots remaining. After each time, I
+make sure the balls in the slots are in increasing order. There are
+nCk possible arrangements of balls in the slots.
+
+Experiment 2: I take a ball from the jar, wipe off the number, and put
+it in randomly chosen empty slot. I repeat this k times until there
+are no balls remaining (and n-k empty slots). There are nCk possible
+arrangements of the balls in the slots.
+
+For the *ORSample*:
+
+Experiment 1: I take a ball from the jar and write down the number on
+one of the blank balls, and put it in the next empty slot, then
+replace the ball. I repeat that k times, leaving no empty slots. The
+number of possible permutations of the slots is $n^k$
+
+Experiment 2: I take the ball from the jar, and write the number on
+one of the blank balls which I then put in one of the random slots. I
+replace the ball in the jar. I repeat this k times, until there are
+n-k empty slots remaining. There are $n^k$ possible arrangements of
+balls in the slots.

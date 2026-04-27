@@ -109,7 +109,7 @@ once. There are 30 possibilities, with the duplicates are elminated.
 Or if you're being really strict, and want to consider /(cupStraw,
 coneChoc)/ the same as /(coneChoc, cupStraw)/, then there are 21.
 
-* Sampling
+* Choosing
 
 How many ways can you choose /k/ objects from a total of /n/ objects? (A
 good mental model here is selecting balls labelled 1-n from a jar).
@@ -126,3 +126,103 @@ choices, k times. nxnxn.... \(n^k\). Without replacements, it's
 similar, but after each 'pull' you have one less ball in the jar, so
 instead of nxnxn..., it's nx(n-1)x(n-2)...(n-k+1)
 
+Note that we /labelled/ the balls. This is important because it avoids
+Leibniz's counting error: He thought the chances of getting a 11 when
+rolling two 6-sided dice was equal, because both had a single outcome:
+5 and 6, and 6 and 6. By treating the two dice as intistiguishable, he
+missed the fact that you can get 11 from 5 and 6 /or/ 6 and 5, which are
+different results.
+
+If order doesn't matter, then the /binomial coefficient/ counts the
+number of subsets of size /k/ of a set of size /n/
+
+\begin{equation}
+\binom{n}{k} = \frac{n(n-1)...(n-k+1)}{k!} = \frac{n!}{(n-k)!k!}
+\end{equation}
+
+
+Notice that this is the 'order matters' formula divded by /k!/. This is
+because, if you list out the 'order-matters' subsets, then group them
+by the elements in each set, there will be /k!/ in each group (i.e. the
+number of permutations of k elements). So by dividing by /k!/, we're
+effectively de-duplicating.
+
+** Choice theorems
+
+*** Complement
+
+\begin{equation}
+\binom{n}{k} = \binom{n}{n-k}
+\end{equation}
+
+This is easily shown by writing in terms of factorials, but a 'story
+proof' is to observe that, if you want to committee of size /k/ from a
+group of /n/ people, you can either choose the people on the committee
+nCk. Or you can choose the people /not/ on the committee nC(n-k). The
+two things are equivalent.
+
+*** Vendermonde's identity
+
+\begin{equation}
+\binom{m+n}{k} = \sum_{j=0}^k \binom{m}{j}\binom{n}{k-j}
+\end{equation}
+
+*** chosing pairs
+
+\begin{equation}
+\frac{(2n)!}{2^n \cdot n!} = (2n-1)(2n-3)...3\cdot1
+\end{equation}
+
+
+* Non-naive definition of probability
+
+** Axioms
+
+A /probability space/ is a sample space /S/ and probability function /P/
+mapping events to numbers between 0 and 1, such that /P(∅)=0/ and
+/P(S)=1/.
+
+/P(A u B)=P(A)+P(B)/ if /A/ and /B/ are *disjoint* (mutually exclusive)
+
+We are still in pebble world: but now not all pebbles have to be the
+same size, and you can have uncountable (continuous) sample spaces, in
+which case the pebbles are more like a mass of mud.
+
+Some properties derived from these axioms:
+
+*Complement*: $P(A^C)=1-P(A)$
+
+*Containment*: /A ⊆ B ⇒ P(A) ≤ P(B)/
+
+*Inclusion-exclusion (2 sets)*: /P(AuB)=P(A)+P(B)-P(AnB)/
+
+** Inclusion Exclusion
+
+The IE property for 2 sets is a special case of the IE in general:
+
+\begin{equation}
+P(\bigcup_{i=1}^n A_i) = \sum_i{P(A_i)} - \sum_{i<j}{P(A_i \cap A_j)} + \sum_{i<j<k}{P(A_i \cap A_j \cap A_k)} - ... + (-1)^{n+1}P(A_1 \cap ... \cap A_n)
+\end{equation}
+
+The alternating plus and minus looks a bit odd. For some intuition on
+why this is the case, consider /n=3/, with a venn diagram of three
+circles A, B, C overlapping. You can add P(A) and P(B) and P(C), but
+then you are double counting the overlap between A and B, A and C, and
+B and C. So deduct P(AnB)+P(AnC)+P(BnC). But then you've deducted too
+much: the intersection area of AnBnC was added 3 times when doing
+P(A)+P(B)+P(C), but has now been deducted three times. So not being
+counted at all, and you need to add it back.
+
+/P(AuBuC)=P(A)+P(B)+P(C)-(P(AnB)+P(AnC)+P(BnC))+P(AnBnC)/
+
+Inclusion-exclusion can be helpful when there symmetry between events.
+Because there are n ways of choosing one event, nC2 ways of
+choosing 2. So the kth term of the formula has nCk sub-terms in the
+sum.
+
+
+\begin{equation}
+P(\bigcup_{i=1}^n A_i) = n{P(A_i)} - \binom{n}{2}{P(A_i \cap A_j)} + \binom{n}{3}{P(A_i \cap A_j \cap A_k)} - ... + (-1)^{n+1}P(A_1 \cap ... \cap A_n)
+\end{equation}
+
+Otherwise the sum can get very tedious.

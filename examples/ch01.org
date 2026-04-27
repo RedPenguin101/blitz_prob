@@ -1,0 +1,410 @@
+#+TITLE: Examples 1: Probability and Counting
+#+PROPERTY: header-args:python :session *Python* :results output :exports both
+#+STARTUP: latexpreview
+
+* How to count
+** The Birthday Problem (1.4.10)
+
+There are /k/ people in the room. What is the probability that two
+people have the same birthday? Assume all birthdays are equally likely
+and there are 365 days in a year.
+
+We can use the naive definition, because birthdays are equally likely.
+But counting directly is difficult.
+
+The simplest way to solve this problem is to use the property
+$P(A^c)=1-P(A)$ and solve for $A^c$ - a 'complement solution'
+strategy. What is the probability that the /k/ people do /not/ share a
+birthday?
+
+There are $365^k$ ways to assign birthdays to the people in the room,
+so that's the denominator. There is 365 ways to chose the first
+birthday. 364 ways to choose the second. etc. down to 365-k+1. So
+
+\begin{align*}
+P(\text{no-match})=\frac{365\cdot364\cdot...\cdot(365-k+1)}{365^k} \\
+P(\text{match})=1-\frac{365\cdot364\cdot...\cdot(365-k+1)}{365^k}
+\end{align*}
+
+** Leibniz' mistake (1.4.12)
+
+If we roll 2 6 sided dice, which is more likely, a sum of 11 or 12?
+
+Label the dice A and B and consider each to be a sub experiment. There
+are 6x6 possible outcomes, equally likely. There are two ways to get
+11: /(5,6)/ and /(6,5)/, and a single way to get 12 /(6,6)/.
+
+** Committees and teams (1.4.13)
+
+Consider a group of 4 people: how many ways are there to choose a 2
+person committee? How many ways are there to break the people into
+teams of 2?
+
+By labelling the people 1,2,3,4, and by enumeration:
+12,13,14,23,24,34.
+
+We can't use the n(n-1)...(n-k+1) approach directly, because that
+gives 4*3=12. But we can notice that this approach counts all outcomes
+exactly twice, for example 12, then 21. So dividing by two we can
+divide by 2 to get 6.
+
+We can use the binomial coefficient (see later) to do 4c2, giving us
+the correct answer of 6.
+
+Breaking the committee into groups of 2: again by enumeration:
+12:34, 13:24, 14:23
+
+We can say that, once you select a team (like in part a), the other
+team is pre-determined - there is no choice. But if we take the
+approach that for each team from part a we have a corresponding group
+overcounts by a factor of 2, because 12:34 is the same as 34:12. So we
+need to divide by 2 once again.
+
+** Club officers (1.4.17)
+
+In a club with /n/ people, how many ways are there to choose a
+president, vice president and treasurer? /n(n-1)(n-2)/
+
+And how many ways to choose 3 officers without predetermined titles?
+nC3.
+
+** Word permutations (1.4.18)
+
+How many ways are there to permute the letters in the word LALALAAA?
+
+We can choose where the 5 A's go. The 3 L's take up the remaining
+slots.
+
+\begin{equation}
+\binom{8}{5}=\binom{8}{3}=\frac{8\cdot7\cdot6}{3!}=56 \text{ permutations}
+\end{equation}
+
+How about STATISTICS? This has 3xS, 3xT, 2xI, 1xA, 1xC. We pick where
+the 3 S's go, out of 10 possible slots. Then the 3 T's from the
+remaining 7. Etc. So the answer is
+
+\begin{equation}
+\binom{10}{3}\binom{7}{3}\binom{4}{2}\binom{2}{1} = \frac{10!}{3!3!2!} = 50400
+\end{equation}
+
+** Binomial Theorem (1.4.19)
+
+The binomial theorem states that for any non-negative integer /n/
+
+\begin{equation}
+(x+y)^n = \sum_{k=0}^n \binom{n}{k} x^k y^{n-k}
+\end{equation}
+
+** Full House (1.4.20)
+
+A 5-card hand is dealt from a 52 card deck. A full house is 3 cards of
+one rank, and 2 cards of another. What is the probability of a full
+house?
+
+There are 52c5 ways to choose 5 cards from the 52, so that's our
+denominator. All 52c5 hands are equally likely, so naive definition
+applies.
+
+There are 13 ranks (2 through 9 and JQKA). The ways to get 3 of a
+given rank are 4c3 (one of each rank per the 4 suits). So the number
+of ways to be dealt a hand of 3 and have all three be the same rank
+are /13x(4c3)/. When considering the second rank, we have to choose from
+12 (disgarding the one we used from the previous 'round'). So it's
+/12x(4c2)/.
+
+\begin{equation}
+P(\text{full house}) = \frac{13\binom{4}{3}12\binom{4}{2}}{\binom{52}{5}}
+\end{equation}
+
+* Newton-Pepys
+
+Which of the following events has the highest probability?
+
+A. at least one 6 appears when 6 dice are rollde
+B. at least two 6's appear when 12 dice are rolled
+C. at least three 6's appear when 18 dice are rolled
+
+When rolling /n/ dice, the number of outcomes is $6^n$.
+
+NOTE: calculating "Less Than" or "Greater Than" probabilities can be
+tricky. Better to break it down into exact numbers. So for "At least 1
+or 6", think, "exactly 1 or exactly 2 or...". And then bear in mind
+the complement property: You /could/ calculate all of that. Or you could
+calculate exactly 0 and take the complement. For part two, it's
+exactly zero or exactly 1, instead of 10 different outcomes.
+
+First consider a simpler problem: How many ways are there of seeing
+exactly 0, 1, 2 or 3 sixes when you roll 3 dice?
+
+0 is pretty easy: When rolling a dice, there are 5 ways of not rolling
+a 6. When rolling /n/ dice, by the multiplication rule, there are $5^n$
+ways of not rolling a 6 (picture a tree with all the 6's crossed out).
+
+How many ways are there to get exactly 1 six when you roll 3 dice?
+Picture the outcome of the experiment: there's the ghost of 3 dice in
+front of you, the upward number is not visible yet. One of them must
+be 6. But it can be in any one of the 3 slots. Then the other 2 can be
+anything from 1 to 5, we don't care which. There are $5^{2}$ ways
+that could happen (1 through 5 in the first empty slot, then 1 through
+5 in the second). So multiplying those together you get $3\cdot5^2$
+
+How about exactly 2? Picture the same scenario: ghost dice: exactly 2
+must be 6's, but we don't care about which ones. This is the binomial
+coeffiecient: 3C2. And that leaves the remaining die to be $5^1$
+
+So generalizing, we can say the number of outcomes for exactly k 6's
+is $\binom{n}{k}5^{n-k}$
+
+#+begin_src python
+  import math
+  def prob_of_k(n,k): return math.comb(n,k) * 5**(n-k) / 6**n
+  print(1-prob_of_k(6,0))
+  print(1-(prob_of_k(12,0)+prob_of_k(12,1)))
+  print(1-(prob_of_k(18,0)+prob_of_k(18,1)+prob_of_k(18,2)))
+#+end_src
+
+#+RESULTS:
+: 0.6651020233196159
+: 0.6186673737323087
+: 0.5973456859477232
+
+* Story Proofs
+** Choosing the Complement (1.5.1: Story proofs 1)
+
+
+\begin{equation}
+\binom{n}{k} = \binom{n}{n-k}
+\end{equation}
+
+This is easily shown by writing in terms of factorials, but a 'story
+proof' is to observe that, if you want to committee of size /k/ from a
+group of /n/ people, you can either choose the people on the committee
+nCk. Or you can choose the people /not/ on the committee nC(n-k). The
+two things are equivalent.
+
+** Team Captain (1.5.2: Story Proofs 2)
+
+Consider a group of /n/ people, from which a team of /k/ will be chosen,
+of whom one will be team captain. How many outcomes are there?
+
+We can choose the team first (nCk), and then pick one of them as the
+captain (k ways). Giving $k\binom{n}{k}$. Or we can choose the captain
+first (n ways), then choose the rest of the team from the remaining
+people: $n\binom{n-1}{k-1}$
+
+This leads to the property:
+
+$$
+n\binom{n-1}{k-1} = k\binom{n}{k}
+$$
+
+** Choosing from two groups / Vandermonde's identity (1.5.3: Story proofs 3)
+
+Consider a student organization of /m/ juniors and /n/ seniors, from which
+a committee of size /k/ will be chosen. There are \binom{m+n}{k} possibilities.
+
+If there are /j/ juniors in the resulting committee, there must be /k-j/
+seniors. So for every selection of juniors (and there are mCj of them
+for each size j from 0 to k), there must be a nC(k-j) selections of
+seniors.
+
+This gives Vandermonde's identity - heinous to prove algebraically,
+but easy to reason about using the above method.
+
+\begin{equation}
+\binom{m+n}{k} = \sum_{j=0}^k \binom{m}{j}\binom{n}{k-j}
+\end{equation}
+
+** Choosing Pairs (1.5.4: Story proofs 4)
+
+How many ways are there to break /2n/ people into /n/ partnerships? We can
+order /2n/ people in /(2n)!/ ways. And this is also the number of
+partnerships, because we can just say that each person is paired up
+with the person next to them.
+
+If the order of the pairs themselves doesn't matter, we need to divide
+by /n!/ (i.e. the permutations of the /n/ pairs).
+
+If the order /within/ the pairs doesn't matter we need to divide by $2^n$
+
+To see this, take n=2, i.e. 4 people: A,B,C,D. This has (2n)!=24
+permutations. Divide them up into n sets of pairs.
+
+#+begin_example
+('A', 'B'), ('C', 'D')
+('C', 'D'), ('A', 'B')
+('A', 'B'), ('D', 'C')
+('D', 'C'), ('A', 'B')
+('A', 'C'), ('B', 'D')
+('B', 'D'), ('A', 'C')
+('A', 'C'), ('D', 'B')
+('D', 'B'), ('A', 'C')
+('A', 'D'), ('B', 'C')
+('B', 'C'), ('A', 'D')
+('A', 'D'), ('C', 'B')
+('C', 'B'), ('A', 'D')
+('B', 'A'), ('C', 'D')
+('C', 'D'), ('B', 'A')
+('B', 'A'), ('D', 'C')
+('D', 'C'), ('B', 'A')
+('B', 'C'), ('D', 'A')
+('D', 'A'), ('B', 'C')
+('B', 'D'), ('C', 'A')
+('C', 'A'), ('B', 'D')
+('C', 'A'), ('D', 'B')
+('D', 'B'), ('C', 'A')
+('C', 'B'), ('D', 'A')
+('D', 'A'), ('C', 'B')
+#+end_example
+
+Divide this up into groups of sets of pairs where each set has the
+same elements in different orders.
+
+#+begin_example
+('A', 'B'), ('C', 'D')
+('C', 'D'), ('A', 'B')
+
+('A', 'B'), ('D', 'C')
+('D', 'C'), ('A', 'B')
+
+('A', 'C'), ('B', 'D')
+('B', 'D'), ('A', 'C')
+
+('A', 'C'), ('D', 'B')
+('D', 'B'), ('A', 'C')
+
+('A', 'D'), ('B', 'C')
+('B', 'C'), ('A', 'D')
+
+('A', 'D'), ('C', 'B')
+('C', 'B'), ('A', 'D')
+
+('B', 'A'), ('C', 'D')
+('C', 'D'), ('B', 'A')
+
+('B', 'A'), ('D', 'C')
+('D', 'C'), ('B', 'A')
+
+('B', 'C'), ('D', 'A')
+('D', 'A'), ('B', 'C')
+
+('B', 'D'), ('C', 'A')
+('C', 'A'), ('B', 'D')
+
+('C', 'A'), ('D', 'B')
+('D', 'B'), ('C', 'A')
+
+('C', 'B'), ('D', 'A')
+('D', 'A'), ('C', 'B')
+#+end_example
+
+There will be n! permutations per set. So we're overcounting by n! and
+need to divide by n! (2 in this example) to get 12.
+
+#+begin_example
+('A', 'B'), ('C', 'D')
+('A', 'B'), ('D', 'C')
+('A', 'C'), ('B', 'D')
+('A', 'C'), ('D', 'B')
+('A', 'D'), ('B', 'C')
+('A', 'D'), ('C', 'B')
+('B', 'A'), ('C', 'D')
+('B', 'A'), ('D', 'C')
+('C', 'A'), ('B', 'D')
+('C', 'A'), ('D', 'B')
+('D', 'A'), ('B', 'C')
+('D', 'A'), ('C', 'B')
+#+end_example
+
+Group the resulting sets where the pairs are the same if you ignore
+the order within the pairs.
+
+#+begin_example
+('A', 'B'), ('C', 'D')
+('B', 'A'), ('C', 'D')
+('A', 'B'), ('D', 'C')
+('B', 'A'), ('D', 'C')
+
+('A', 'C'), ('B', 'D')
+('C', 'A'), ('B', 'D')
+('A', 'C'), ('D', 'B')
+('C', 'A'), ('D', 'B')
+
+('A', 'D'), ('B', 'C')
+('D', 'A'), ('B', 'C')
+('A', 'D'), ('C', 'B')
+('D', 'A'), ('C', 'B')
+#+end_example
+
+Each group will have a set where pair /i/ is (x,y), and another where
+the pair is (y,x), but the other pairs in the set are the same. In
+other words, the set is double counted for pair /i/. So you need to
+divide by 2. But you need to do this for every pair of the n. So
+divide by $2^n$. Which here is 4, so the answer is 12/4=3
+
+An alternative way to consider this problem is to consider that there
+are 2n-1 choices for the partner of person A. Then 2n-3 choices for
+person B (or C if B was chosen as the partner of person A). And so on.
+So here: 3*1=3.
+
+This proves the equivalence property:
+
+\begin{equation}
+\frac{(2n)!}{2^n \cdot n!} = (2n-1)(2n-3)...3\cdot1
+\end{equation}
+
+
+* Non-naive definition
+
+** de Montmort's matching problem / inclusion exclusion (1.6.4)
+
+Consider a deck of cards labeled 1 to n. You flip the cards one by
+one, saying th numbers 1 through n as you do so. You win if, at some
+point, the number you say matches the number on the card. What is the
+probability of winning.
+
+So rephrasing this: the problem is that at least one of the cards in
+slots 1 to n has the same number as its slot.
+
+There are /n!/ possible outcomes (permutations of the n cards).
+
+Let $A_i$ be the event that the card in position i has number i. We
+all looking for $P(\bigcup_{i=1}^n{A_i})$
+
+There are /(n-1)!/ outcomes favourable to $A_i$ - the permutations of
+the (n-1) cards that are not card i. So /P(Ai) = (n-1)!/n! = 1/n/
+
+(you can also observe that card /i/ is equally likely to be in /any/ of
+the /n/ slots, including slot /i/. So 1/n)
+
+$A_i \cap A_j$ has (n-2)! favourable outcomes, by the same logic: the
+permutations of the (n-2) cards that are not /i/ or /j/.
+
+$$
+P(A_i \cap A_j) = \frac{(n-2)!}{n!} = \frac{1}{n(n-1)}
+$$
+
+You can follow this logic for any number of events.
+
+Using inclusion-exclusion:
+
+\begin{equation}
+P(\bigcup_{i=1}^n A_i) = \sum_i{P(A_i)} - \sum_{i<j}{P(A_i \cap A_j)} + \sum_{i<j<k}{P(A_i \cap A_j \cap A_k)} - ... + (-1)^{n+1}P(A_1 \cap ... \cap A_n)
+\end{equation}
+
+Since the kth term has nCk subterms, and each subterm of each term is
+equally likely:
+
+
+\begin{align}
+P(\bigcup_{i=1}^n A_i) = \frac{n}{n} - \frac{\binom{n}{2}}{n(n-1)} + \frac{\binom{n}{3}}{n(n-1)(n-2)} - ... + (-1)^{n+1} \frac{1}{n!} \\
+= 1 - \frac{1}{2!} + \frac{1}{3!} + ... + (-1)^{n+1}\frac{1}{n!}
+\end{align}
+
+Compare this to the Taylor series for /1/e/:
+
+\begin{align}
+e^{-1} = 1 - \frac{1}{1!} + \frac{1}{2!} - \frac{1}{3!} + ... \\
+P(\bigcup_{i=1}^n A_i) \approx 1 - e^{-1} \approx 0.63
+\end{align}
+

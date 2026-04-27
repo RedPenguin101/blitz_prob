@@ -1,0 +1,141 @@
+#+TITLE: Summaries
+#+PROPERTY: header-args:python :session *Python* :results output :exports both
+#+STARTUP: latexpreview
+
+* Links
+
+https://stat110.net
+
+https://www.youtube.com/playlist?list=PL2SOU6wwxB0uwwH80KTQ6ht66KWxbzTIo
+
+* Chapter Map
+
+Part 1: Counting and Probability
+Part 2: Conditional Probability
+Part 3: Random variables and their distribution
+Part 4: Expectation
+Part 5: Continuous random variables
+Part 6: Moments
+Part 7: Joint distributions
+Part 8: Transformations
+Part 9: Conditional Expectation
+Part 10: Inequalities and Limits
+Part 11: Markov Chains
+Part 12: MCMC
+Part 13: Poisson Processes
+
+* Glossary and Definitions
+
+** Permutation
+
+A permutations of n elements is an arrangement of them in some order.
+There are /n!/ possible permutations of a set of /n/ elements.
+
+/proof/: from the /sampling without replacement, order dependent/ rule.
+this is how many ways you can choose n elements from n:
+/n(n-1)...(n-n+1)/, or /n!/
+
+** Sampling
+
+How many ways are there to take k objects from a set of n.
+
+|              | order_matters    | order_doesnt |
+|--------------+------------------+--------------|
+| replace      | n^k              | (n+k-1)Ck    |
+| dont_replace | n(n-1)...(n-k-1) | nCk          |
+
+Rephrasing the headers here:
+
+1. "Order Matters" means "ordered set". "Order doesn't matter" means unordered set
+2. "replace" means "multiset" (items can appear more than once), "don't replace" means unique set
+
+So the 'type' of the operation can be
+
+1. ORSample(n,k) -> $n^k$ -> ordered multi-set
+2. RSample(n,k)  -> $\binom{n+k-1}{k}$ -> multi-set
+3. OSample(n,k)  -> $n(n-1)...(n-k+1)$ -> ordered set
+4. Sample(n,k)   -> $\binom{n}{k}$ -> set
+
+OSample can also be written $\frac{n!}{(n-k)!}$. Sample, which is the
+binomial coefficient, is the former, but removing the /k!/ duplicates
+(see the proof for binomial coefficient) to derive the definition
+$\frac{n!}{(n-k)!k!}$
+
+** Multinomial Coefficient
+
+The number of permutations of /n/ items, where /k/ of those items are
+distinct:
+
+$$\frac{n!}{n_1! \, n_2! \cdots n_k!}$$
+
+where $n$ is the total number of items and $n_1, n_2, \ldots, n_k$ are
+the counts of each distinct item (so $n_1 + n_2 + \cdots + n_k = n$).
+
+It's a generalisation of the binomial coefficient
+
+$$
+\binom{n}{k} = \frac{n!}{k!(n-k)!}
+$$
+
+which you can think of as the special case where there are only two
+distinct "types" — chosen and not-chosen.
+
+** Sets
+
+*** Counting subsets
+
+A set with /n/ elements has $2^n$ subsets, including the empty set ∅ and
+the set itself
+
+*** Counting subsets of a given size / Binomial Coefficient
+
+The binomial coefficient give the number of subsets of a given size:
+
+\begin{equation}
+\binom{n}{k}=\frac{n!}{(n-k)!k!}
+\end{equation}
+
+(for /k<=n/. if /k>n/, nCk is 0, because you can't choose more objects
+than there are in the set)
+
+Bear in mind that, for computation, the formulation below can often be
+much faster.
+
+\begin{equation}
+\binom{n}{k}=\frac{n(n-1)...(n-k+1)}{k!}
+\end{equation}
+
+/proof/: Let /A/ be a set with /|A|=n/. By the /sampling without replacement/
+theorem (1.4.8), there are /n(n-1)...(n-k+1)/ ways to take k objects
+from the set, if order is important. This can be written
+\(\frac{n!}{(n-k)!}\). The output of this sampling is a set of
+permutations of k objects.
+
+Since every permutation of k object can be be written in /k!/ ways
+(permutation rule), and every permutation of every set of k objects
+will be represented in the output, we are overcounted by /k!/. So we
+divide by /k!/ to get the order-independent answer.
+** Sample Space
+** Probability Definition
+
+A /probability space/ is a Sample Space /S/ and a /probability function/ /P/
+which maps an event /A/ in /S/ to a real number between 0 and 1,
+satisfying the following:
+
+\begin{align}
+P(\emptyset) = 0 \\
+P(S) = 1 \\
+\text{If } A_1, A_2,... \text{ are disjoint events, then} \\
+P(\bigcup_{i=1}^{\infty} A_j) = \sum_{j=1}^\infty P(A_j)
+\end{align}
+
+We are still in pebble space. But now the pebbles have different
+masses. (or, in the case of uncountable sample space, mud spread over
+a region, with the mass of the mud being 1)
+
+*** Properties
+
+\begin{equation}
+P(S) = P(A \cup A^c) = P(A) + P(A^c) = 1
+\end{equation}
+
