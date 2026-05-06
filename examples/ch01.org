@@ -168,6 +168,76 @@ is $\binom{n}{k}5^{n-k}$
 : 0.6186673737323087
 : 0.5973456859477232
 
+** Bose-Einstein
+
+How many ways are there to choose /k/ times from a set of /n/ objects with
+replacement, if order doesn't matter (we only care about how many
+times each object, was chosen, not the order in which they were
+chosen)?
+
+/Solution:/
+
+When order does matter, the answer is $n^k$ by the multiplication
+rule, but this problem is much harder. We will solve it by solving an
+/isomorphic/ problem.
+
+Let us find the number of ways to put /k/ indistinguishable particles
+into /n/ indistinguishable boxes. That is, swapping the particles in any
+way is not considered a separate possibility: all that matters are the
+/counts/ for how many particles are in each box. This scenario is known
+as a /Bose-Einstein/ problem, since these physicists studied related
+problems about indistinguishable particles in the 1920's, using their
+ideas to successfully predict the existence of a strange state of
+matter known as a Bose-Einstein condensate.
+
+Any configuration can be encoded as a sequence of |'s and ⭘'s in a
+natural way:
+
+#+begin_example
+| ⭘ | ⭘ ⭘ | ⭘ ⭘ ⭘ | ⭘ |
+#+end_example
+
+To be valid, a sequence must start and end with a |, and have exactly
+n-1 |'s, and exactly k ⭘'s. Conversely, any such sequence is a valid
+encoding for some configuration of particles in boxes. Imagine that we
+have written down the starting and ending |'s, which represent the
+outer walls. There are now n+k-1 slots. We need to select where to put
+the ⭘'s, since the |'s then go in all the other slots. So the number
+of outcomes is $\binom{n+k-1}{k}$. This counting method is sometimes
+called the /stars and bars/ argument.
+
+To relate this result back to the original question, we can let each
+box correspond to one of the /n/ objects and use the particles as "check
+marks" to tally how many times each object is selected. For example,
+if a certain box contains exacly 3 particles, that means the object
+corresponding to that box was chosen exacly 3 times. The particles
+being indistinguishable corresponds to the face that we don't care
+about the order in which the objects are chosen. Thus, the answer to
+the original question is also (n+k-1)Ck.
+
+Another isomorphic problem is to count the number of solutions
+$(x_1,...,x_n)$ to the equation $x_1 + x_2 + ... + x_n = k$ where the
+$x_i$ are nonnegative integers. This is equivalent since we can thing
+of $x_i$ as the number of particles in the $i^{th}$ box.
+
+The BE results shouldn't be used in the naive definition of
+probability except in special cirmcumstances. For example, consider a
+survey where a sample of size /k/ is collected by choosing people from a
+population of size /n/ one at a time, with replacement and equal
+probabilities. Then the n^k /ordered/ samples are equally likely, making
+the naive definition applicable, but the (n+k-1)Ck unordered samples
+(where all that matters is how many times each person was sampled) are
+/not/ equally likely.
+
+As another example, with n=365 days a year and k people, how many
+possible /unordered/ birthday lists are there? for example, for k=3, we
+want to count lists like May1, March31, April11, where all
+permutations are considered equivalent. We can't do a simple
+adjustment for overcounting such as n^k/3! since, e.g. there /are/ 3!=6
+permutations of May1, March31, April11, but only 3 permutations of
+March31, March31, April11. The number of lists are (n+k-1)Ck, but each
+list in the result is not equally likely.
+
 * Story Proofs
 ** Choosing the Complement (1.5.1: Story proofs 1)
 

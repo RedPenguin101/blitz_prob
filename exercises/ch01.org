@@ -623,18 +623,84 @@ their hand at that point, so they can only actually receive one hand.
 More broadly, each player that is dealt to constrains the
 possibilities available to the next player.
 
-** 13
+** 13 Superdecks
 
-A casino uses 10 standard decks of cards mixed together into one dig
+A casino uses 10 standard decks of cards mixed together into one big
 deck, which we will call a /superdeck/. Thus the superdeck has 520
 cards, and 10 copies of each card.
 
-How many different 10-card hands can be dealth from the superdeck? The
+How many different 10-card hands can be dealt from the superdeck? The
 order of the cards does not matter, nor does it matter which of the
 original 10 decks the cards came from. Express your answer as a
 binomial coefficient
 
 Hint: Bose-Einstein.
+
+/Solution:/
+
+Consider a n-deck: a deck consisting of one card each of n unique
+cards-types A,B,C.... etc.
+
+A k-n-deck consists of a combination of k n-decks. So a
+2-2-deck has cards =A A B B=, where the A and B cards are
+indistinguishable. a 3-2-deck is =A A A B B B=.
+
+The number of (unordered) outcome of selecting 2 cards from a 2-2-deck
+is 3:
+
+#+begin_example
+A A (2A,0B)
+A B (1A,1B)
+B B (0A,2B)
+#+end_example
+
+Selecting 3 cards from a 3-3-deck has 10 outcomes:
+
+#+begin_example
+A A A (3A,0B,0C)
+A A B (2A,1B,0C)
+A A C (2A,0B,1C)
+A B B (1A,2B,0C)
+A B C (1A,1B,1C)
+A C C (1A,0B,2C)
+B B B (0A,3B,0C)
+B B C (0A,2B,0C)
+B C C (0A,1B,2C)
+C C C (0A,0B,3C)
+#+end_example
+
+What we care about here is only the unique counts of each card-type in
+the result, because each card of a given type is indistinguishable.
+This is isomorphic to the "putting k indistinguishable items in n
+indistinguishable boxes" problem (the bose-einstein problem), where
+the boxes are the card-types, and the items are the counts of that
+card-type in the result.
+
+reformulating the above examples:
+
+#+begin_example
+CARD/BOX: AB
+       1: 20
+       2: 11
+       3: 02
+
+CARD/BOX: ABC
+       1: 300
+       2: 210
+       3: 201
+       4: 120
+       5: 111
+       6: 102
+       7: 030
+       8: 021
+       9: 012
+      10: 003
+#+end_example
+
+And it can be solved with the bose-einstein solution
+$\binom{n+k-1}{k}$. So the answer to the problem "how many ways to
+select 10 cards from a 10-52-deck" is (52+10-1)C10 = 61C10 =
+90,177,170,226
 
 ** 14 Pizza
 
