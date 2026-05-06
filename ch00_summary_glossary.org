@@ -42,7 +42,7 @@ How many ways are there to take k objects from a set of n.
 |              | order_matters    | order_doesnt |
 |--------------+------------------+--------------|
 | replace      | n^k              | (n+k-1)Ck    |
-| dont_replace | n(n-1)...(n-k-1) | nCk          |
+| dont_replace | n(n-1)...(n-k+1) | nCk          |
 
 Rephrasing the headers here:
 

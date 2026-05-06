@@ -1,0 +1,123 @@
+#+TITLE: Counting Cards: A collection of examples
+#+PROPERTY: header-args:python :session *Python* :results output :exports both
+#+STARTUP: latexpreview
+
+#+begin_src python
+  import math
+  C = math.comb
+#+end_src
+
+#+RESULTS:
+: None
+
+* Basic outcomes
+
+How many possible permutations of cards are there in a deck?
+
+This is just the permutation definition: /52!/
+
+What's the probability the top card in a shuffled deck will be the ace
+of spaces?
+
+There's one favorable outcome, and the sample space has 52 outcomes,
+so 1/52
+
+What's the probability the top card will be a heart? There are 13
+favourable outcomes, out of 52, so 13/52.
+
+How many /events/ are there for the experiment of picking a card from a
+standard deck?
+
+There are 52 outcomes, and an event is a subset of outcomes, so the
+number of events is the number of subsets, 2^52.
+
+How many ways are there of selecting a hand of k cards from a deck of
+52?
+
+52Ck. Proving this is a proof of the binomial coefficient: there are
+52 ways to choose the first card, 51 to choose the second... for k
+terms. But this is order-dependent: every permutation of k cards is
+going to be represented, so is overcounted k! times.
+
+If you are dealt 3 cards, what's the probability of the event that all
+cards 3 cards are of the same rank?
+
+First calculate how many outcomes have 3 cards of a /particular/ rank: 3
+aces. There are 4 aces, so there are going to be 4C3=4 outcomes which
+have 3 aces: of CDHS: CDH, CDS, CHS, DHS. There are 13 ranks, so by
+multiplication rule, the answer is 13x4C3=52. so 52/52c3
+
+* Poker Hands
+
+A poker hand consists of 5 cards.
+
+The sample space is all (order-independent) sets of 5 cards.
+
+The number of outcomes is 52C5 (counting the number of ways you can
+select 5 cards from 52) - about 2.6 million.
+
+** 3 of a kind
+
+Represent a hand as a sequence of cards like
+
+AAAKQ (or any permutation of that)
+
+There are 4c3 ways you can pick the 3 aces, and four ways (4c1) to
+pick the king and queen. 4x4x4=64.
+
+If we say it can be any suit combination.
+
+XXXYZ
+
+Then there are 13c1 possibilities for the suit X, and 12c2 ways for
+the suits Y and Z (it just can't be X). So the answer is
+13x66x64=54912.
+
+** Full house
+
+A full house is 3 cards of one rank, and 2 cards of another.
+
+XXXYY
+
+By extending the above, there are 13c1x4c3 ways of getting the 3. Only
+now there's only one rank to pick (12c1) and (4c2) ways to pick the
+pair.
+
+13c1 x 4c3 x 12c1 x 4c2 = 3744
+
+** A non-royal flush
+
+This is 5 cards of the same suit.
+
+Ignore the royal flush for now. There are 4 suits of 13 cards, and
+we're picking 5 cards: so it's 4c1 x 13c5.
+
+And there are 4 royal flushes (one for each suit), so 4 x (13c5-1)
+
+** Two pair
+
+XXYYZ
+
+The instinct is to follow from the full house and do
+
+#+begin_src python :results value
+  import math
+  C = math.comb
+  C(13,1) * C(4,2) * C(12,1) * C(4,2) * C(11,1) * C(4,1)
+#+end_src
+
+#+RESULTS:
+: 247104
+
+But that is going to overcount the case where X is Kings and Y is
+Aces, and X is Aces and Y is Kings. You need to divide by 2! to remove
+the overcounting, or alternatively consider that you are choosing 2
+from 13, not 1 from 13 and 1 from 12. (mathematically these are
+equivalent: 13c1x12c1/2! is the definition of 13c2)
+
+#+begin_src python :results value
+  C(13,2) * C(4,2) * C(4,2) * C(11,1) * C(4,1)
+#+end_src
+
+#+RESULTS:
+: 123552

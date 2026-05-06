@@ -490,50 +490,180 @@ or one to the right?
 A path of this type will have exactly X+Y = 221 steps, exactly X of
 them to the right, exactly Y up.
 
-At each point, there are two choices: go up or go right. An exception
-is when x=110, in which case there is a single choice: up. Similarly
-when y=111, the only choice is right.
+Consider the representation as a string of "RURRU..." X+Y slots long.
+We need to fill the slots with X R's and Y U's. There are (X+Y)CX ways
+to put X items in X+Y slots. So this is the number of paths.
 
-#+begin_example
-RRUU
-RURU
-RUUR
-URRU
-URUR
-UURR
-
-RRUU
-..X
-..X
-XXX
-
-RURU
-..X
-.XX
-XX.
-
-RUUR
-.XX
-.X.
-XX.
-
-URRU
-..X
-XXX
-X..
-
-URUR
-.XX
-XX.
-X..
-
-UURR
-XXX
-X..
-X..
-#+end_example
+\begin{equation}
+\binom{110+111}{110}
+\end{equation}
 
 *** b) Paths to 210, 211 through 110, 111
 
 How many paths are there from (0,0) to (210, 211), under the same
-conditions, but the path has to go through (110,111)
+conditions, but the path has to go through (110,111)?
+
+First count the paths from 0,0 to 110,111, then the paths from 110,111
+to 210,211. The answer is the product of the two numbers (by the
+multiplication rule)
+
+\begin{equation}
+\binom{110+111}{110} \cdot \binom{100+100}{100}
+\end{equation}
+
+** 10 Course Selection
+
+To fulfill the requirements for a certain degree, a student can choose
+to take any 7 out of a list of 20 courses, with the constraint that at
+least 1 of the 7 courses must be a statistics course. Suppose that 5
+of the 20 courses are statistics courses.
+
+*** a) how many choices are there for which 7 courses to take?
+
+Ignoring the constraint, there would be 20C7 options - 77,520 - for
+picking 7 courses out of 20.
+
+Consider that the sample space is all selections of 7 courses. The
+event A is: The selections which have at least 1 statistics course in
+it.
+
+Consider the complementary event A^c: all the courses which /don't/ have a
+stats course in them, we are left with a pool of 15 courses from which
+we need to pick 7: 15C7 = 6435.
+
+So the size of the event A is S-A^c = 77,520-6,435 = 71,085.
+
+*** b) Explain why the answer to a) is not 5c1 x 19c6
+
+5C1 x 19C6 = 135,660
+
+An obvious answer is that this is more than the actual possible
+outcomes of choosing 7 courses from /any/ 20. So clearly some
+overcounting is going on.
+
+Specifically the overcounting ignores that 4 of the 19 remaining
+courses are also stats courses. So for example, if the courses are
+labelled A through T, and A through E are the stats course, if the
+result of the 5c1 is course A, and the 6 chosen from the remaining 19
+is BFGHI..., this is duplicative of the case where B is chosen in the
+5C1, and the result of the 6 is AFGHI...
+
+** 11 Counting Functions
+
+Let /A/ and /B/ be sets with /|A|=n/, and /|B|=m/
+
+*** a) Normal functions
+
+How many functions are there from /A/ to /B/ (i.e., functions with domain
+/A/ assigning an element of /B/ to each element of /A/)?
+
+/f : A → B/.
+
+/f(x:A) → y:B/
+
+A function is a unique mapping of each value in /A/ to a value in /B/.
+Multiple values in A can map to the same value in /B/
+
+This is, in effect, selecting n items from m, with replacements
+(because of the multiple mappings) and with order-dependence. So the
+answer is $m^n$
+
+There are /m/ ways to select the mapping for $a_1$, /m/ for $a_2$, etc.
+
+*** b) One-to-one functions
+
+How many one-to-one functions are there from /A/ to /B/?
+
+A one-to-one function is when any two distinct inputs in A get mapped
+to distinct outputs in B. Mathematically: $f(x) \neq f(y)$ whenever $x \neq y$
+
+This is a tightening of the constraint that a value in B can be mapped
+from multiple values in A. Continuing the framing from the previous
+part, if that was selecting /with/ replacement, this is selecting
+/without/ replacement, which is /m(m-1)(m-2)...(m-n+1)/
+
+There is the additional constraint here that m ≥ n, otherwise you run
+out of things to map to - in which case there are 0 one-to-one
+functions.
+
+** 12
+
+Four players, name A, B, C, and D, are playing a card game. A
+standard, well-shuffled deck of cards is dealt to the players (so each
+player receives a 13-card hand).
+
+*** a)
+
+How many possibilities are there for the hand that player A will get?
+(Within a hand, the order in which cards were received doesn't
+matter.)
+
+52C13: how many ways are there to choose 13 cards from 52.
+
+*** b)
+
+How many possibilities are there overall for what hands everyone will
+get, assuming that it matters which player gets which hand, but not
+the order of cards within a hand?
+
+\begin{equation}
+\binom{52}{13} \cdot \binom{39}{13} \cdot \binom{26}{13} \cdot \binom{13}{13}
+\end{equation}
+
+
+*** c)
+
+Explain intuitively why the answer to Part (b) is not the fourth power
+of the answer to Part (a).
+
+Because would assume that the 4th player being dealt to has 52C13
+possible hands they can have: but the dealer only has 13 cards left in
+their hand at that point, so they can only actually receive one hand.
+
+More broadly, each player that is dealt to constrains the
+possibilities available to the next player.
+
+** 13
+
+A casino uses 10 standard decks of cards mixed together into one dig
+deck, which we will call a /superdeck/. Thus the superdeck has 520
+cards, and 10 copies of each card.
+
+How many different 10-card hands can be dealth from the superdeck? The
+order of the cards does not matter, nor does it matter which of the
+original 10 decks the cards came from. Express your answer as a
+binomial coefficient
+
+Hint: Bose-Einstein.
+
+** 14 Pizza
+
+You are ordering 2 pizzas. A pizza can be a small, medium, large or
+extra large, with any combination of 8 possible toppings is allowed,
+as is getting all 8). How many possibilities are there for your two
+pizzas?
+
+Start with the toppings: There are 8 toppings in the set, and we can
+pick any subset, including none and the set. Any subset of size /n/ has
+$2^n$ subsets, so $2^8$ possibilities.
+
+There are 4 types of pizza, so there are 4 x 2^8 ways to order 1
+pizza. But we are ordering two pizzas. This is order independent,
+(since getting pizza type A and pizza type B is the same as B and A)
+with replacement (the pizzas can be the same pizza), so the (n+k-1)Ck
+rule applies, where n is the 4x2^8, and k is 2.
+
+\begin{equation}
+\binom{4\cdot2^8+1}{2}
+\end{equation}
+
+#+begin_src python :results both
+  import math
+  num = 4*2**8+1
+  print(f'num: {num}')
+  print(f'combos: {math.comb(num,2)}')
+#+end_src
+
+#+RESULTS:
+: num: 1025
+: combos: 524800

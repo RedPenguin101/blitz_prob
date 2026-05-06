@@ -1,0 +1,78 @@
+#+TITLE: Chapter 1: Probability and Counting
+#+PROPERTY: header-args:python :session *Python* :results output :exports both
+#+STARTUP: latexpreview
+
+https://stat110.hsites.harvard.edu/sites/g/files/omnuum10111/files/stat110/files/strategic_practice_and_homework_1.pdf
+
+* 1: Naive Definition of Probability
+
+** 1 comparative probability
+
+*** a) dice rolls
+
+Probability that the total after rolling 4 fair dice is 21 vs.
+Probability that the total after rolling 4 fair dice is 22
+
+To get 21:
+6 6 6 3: 4 possibilities
+6 6 5 4: 12 possibilities
+6 5 5 5: 4 possibilities
+
+Total: 20 possibilities
+
+To get 22:
+6 6 6 4: 4 possibilities
+6 6 5 5: 6 possibilities
+
+Total: 10 possibilities
+
+The generalization of the counting is the multinomial: The number of
+permutations of n objects, divided by the number of times each objects
+appears (to remove the overcounting)
+
+#+begin_src python
+  import math
+  from collections import Counter
+
+  def multinomial_count(xs):
+      return math.factorial(len(xs)) / math.prod([math.factorial(x) for x in Counter(xs).values()])
+
+  print(multinomial_count([6, 6, 6, 3]))
+  print(multinomial_count([6, 6, 5, 4]))
+  print(multinomial_count([6, 6, 5, 5]))
+#+end_src
+
+#+RESULTS:
+: 4.0
+: 12.0
+: 6.0
+
+*** b) Palindromes
+
+Probability that a random 2 letter word is a palindrome vs.
+Probability that a random 3 letter word is a palindrome
+
+Given a random word XY, what is the probility that X=Y?
+
+or...
+
+Given a random work XZY, what is the probability that X=Y?
+
+It's the same in both cases: 1 in 26.
+
+** 2 Poker hands
+
+A random 5 card poker hand is dealt from a standard deck of cards.
+Find the probability of each of the following in terms of binomial
+coefficients.
+
+*** a) A flush (not counting a royal flush)
+
+(all 5 cards being of the same suit)
+
+For a given suit, there are 13c5 ways of picking a flush, and exactly
+one way of picking a royal flush. There are 52c5 ways of picking any 5
+cards. So the answer is 4x(13C5-1)/52C5.
+
+*** b) Two pair
+
